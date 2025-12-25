@@ -49,6 +49,12 @@ body {
     padding: var(--spacing-md);
     overflow-x: hidden;
     position: relative;
+    /* 移动端优化 */
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: manipulation;
 }
 
 /* 背景动画装饰 */
@@ -323,6 +329,10 @@ body::before {
     box-shadow: 0 4px 12px rgba(79, 195, 247, 0.4);
     position: relative;
     overflow: hidden;
+    /* 移动端触摸优化 */
+    -webkit-tap-highlight-color: rgba(255, 255, 255, 0.3);
+    touch-action: manipulation;
+    user-select: none;
 }
 
 .tetris-card .card-button {
@@ -470,6 +480,27 @@ body::before {
     font-weight: 600;
     text-shadow: 0 1px 2px var(--shadow);
     opacity: 0.9;
+    margin-bottom: 0.5rem;
+}
+
+.footer-link {
+    margin-top: 0.5rem;
+}
+
+.footer-link a {
+    color: var(--text-light);
+    text-decoration: none;
+    font-size: 0.9rem;
+    opacity: 0.8;
+    transition: opacity var(--transition-fast) ease, transform var(--transition-fast) ease;
+    display: inline-block;
+    text-shadow: 0 1px 2px var(--shadow);
+}
+
+.footer-link a:hover {
+    opacity: 1;
+    transform: translateY(-2px);
+    text-decoration: underline;
 }
 
 /* ==================== 响应式设计 ==================== */

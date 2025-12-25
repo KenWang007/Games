@@ -18,7 +18,23 @@
         initAccessibility();
         addKeyboardNavigation();
         logGameHubInfo();
+        registerServiceWorker();
     });
+
+    // ==================== Service Worker 注册 ====================
+    function registerServiceWorker() {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js')
+                .then((registration) => {
+                    console.log('%c✅ Service Worker 注册成功', 'color: #66BB6A; font-size: 12px;');
+                    console.log('Scope:', registration.scope);
+                })
+                .catch((error) => {
+                    console.log('%c❌ Service Worker 注册失败', 'color: #FF6B9D; font-size: 12px;');
+                    console.log('Error:', error);
+                });
+        }
+    }
 
     // ==================== 游戏卡片初始化 ====================
     function initGameCards() {
