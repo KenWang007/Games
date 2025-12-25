@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="游戏中心 - 经典小游戏合集">
+    <title>🎮 游戏中心</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="game-hub-container">
+        <header class="hub-header">
+            <h1 class="hub-title">
+                <span class="title-icon">🎮</span>
+                游戏中心
+            </h1>
+            <p class="hub-subtitle">选择一个游戏开始玩吧！</p>
+        </header>
+
+        <main class="games-grid">
+            <!-- 俄罗斯方块游戏卡片 -->
+            <div class="game-card tetris-card">
+                <div class="card-glow"></div>
+                <div class="card-content">
+                    <div class="card-icon">
+                        <span class="icon-emoji">🧱</span>
+                    </div>
+                    <h2 class="card-title">卡通俄罗斯方块</h2>
+                    <p class="card-description">经典的俄罗斯方块游戏，专为儿童设计的卡通风格界面</p>
+                    <div class="card-features">
+                        <span class="feature-tag">🎨 卡通风格</span>
+                        <span class="feature-tag">⭐ 多难度</span>
+                        <span class="feature-tag">🎵 音乐音效</span>
+                    </div>
+                    <a href="Eluosi/EluosiGame/src/index.html" class="card-button">
+                        <span class="button-text">开始游戏</span>
+                        <span class="button-icon">▶️</span>
+                    </a>
+                </div>
+                <div class="card-decoration tetris-decoration">
+                    <div class="block block-1"></div>
+                    <div class="block block-2"></div>
+                    <div class="block block-3"></div>
+                    <div class="block block-4"></div>
+                </div>
+            </div>
+
+            <!-- 植物大战僵尸游戏卡片 -->
+            <div class="game-card pvz-card">
+                <div class="card-glow"></div>
+                <div class="card-content">
+                    <div class="card-icon">
+                        <span class="icon-emoji">🌻</span>
+                    </div>
+                    <h2 class="card-title">植物大战僵尸</h2>
+                    <p class="card-description">保护你的家园！策略性塔防游戏，多种植物对抗僵尸</p>
+                    <div class="card-features">
+                        <span class="feature-tag">🎯 策略塔防</span>
+                        <span class="feature-tag">🌱 多种植物</span>
+                        <span class="feature-tag">🧟 多种僵尸</span>
+                    </div>
+                    <a href="ZhiwuVSJiangshi/ZhiwuVSJiangshi/index.html" class="card-button">
+                        <span class="button-text">开始游戏</span>
+                        <span class="button-icon">▶️</span>
+                    </a>
+                </div>
+                <div class="card-decoration pvz-decoration">
+                    <div class="plant plant-1">🌻</div>
+                    <div class="plant plant-2">🌿</div>
+                    <div class="zombie zombie-1">🧟</div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="hub-footer">
+            <p class="footer-text">© 2025 游戏中心 | 享受游戏时光 🎉</p>
+        </footer>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html>
+
