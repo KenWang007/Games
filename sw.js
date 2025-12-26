@@ -1,7 +1,7 @@
 // Service Worker for Game Hub
 // 提供离线访问和缓存功能
 
-const CACHE_NAME = 'game-hub-v1';
+const CACHE_NAME = 'game-hub-v2-mobile-fix'; // 更新版本强制刷新缓存
 const urlsToCache = [
   '/Games/',
   '/Games/index.html',
@@ -12,7 +12,10 @@ const urlsToCache = [
 
 // 安装 Service Worker
 self.addEventListener('install', (event) => {
-  console.log('[Service Worker] Installing...');
+  console.log('[Service Worker] Installing new version...');
+  // 强制跳过等待，立即激活
+  self.skipWaiting();
+  
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
@@ -27,7 +30,7 @@ self.addEventListener('install', (event) => {
 
 // 激活 Service Worker
 self.addEventListener('activate', (event) => {
-  console.log('[Service Worker] Activating...');
+  console.log('[Service Worker] Activating new version...');
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
@@ -38,6 +41,9 @@ self.addEventListener('activate', (event) => {
           }
         })
       );
+    }).then(() => {
+      // 立即接管所有页面
+      return self.clients.claim();
     })
   );
 });

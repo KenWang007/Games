@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>🧹 清除缓存工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        h1 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        .card h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .status.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .btn:active {
+            transform: scale(0.98);
+        }
+        .btn-primary {
+            background: #10b981;
+            color: white;
+        }
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        .btn-secondary {
+            background: #6366f1;
+            color: white;
+        }
+        .step {
+            padding: 10px;
+            margin: 10px 0;
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            border-radius: 4px;
+        }
+        #log {
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧹 清除缓存工具</h1>
+        
+        <div class="card">
+            <h2>📱 当前状态</h2>
+            <div id="status-info"></div>
+        </div>
+        
+        <div class="card">
+            <h2>🔧 操作步骤</h2>
+            <button class="btn btn-danger" onclick="clearAllCaches()">1️⃣ 清除所有缓存</button>
+            <button class="btn btn-danger" onclick="unregisterServiceWorkers()">2️⃣ 注销Service Worker</button>
+            <button class="btn btn-primary" onclick="reloadPage()">3️⃣ 重新加载页面</button>
+            <button class="btn btn-secondary" onclick="goToGame()">✅ 打开游戏</button>
+        </div>
+        
+        <div class="card">
+            <h2>📋 操作日志</h2>
+            <div id="log"></div>
+        </div>
+        
+        <div class="card">
+            <h2>💡 使用说明</h2>
+            <div class="step">
+                <strong>步骤1：</strong> 点击"清除所有缓存"按钮
+            </div>
+            <div class="step">
+                <strong>步骤2：</strong> 点击"注销Service Worker"按钮
+            </div>
+            <div class="step">
+                <strong>步骤3：</strong> 点击"重新加载页面"按钮
+            </div>
+            <div class="step">
+                <strong>步骤4：</strong> 点击"打开游戏"进行测试
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const log = (message, type = 'info') => {
+            const logDiv = document.getElementById('log');
+            const time = new Date().toLocaleTimeString();
+            const prefix = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+            logDiv.innerHTML += `[${time}] ${prefix} ${message}<br>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        };
+        
+        // 检查状态
+        async function checkStatus() {
+            const statusDiv = document.getElementById('status-info');
+            let html = '';
+            
+            // 检查Service Worker
+            if ('serviceWorker' in navigator) {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                if (registrations.length > 0) {
+                    html += '<div class="status warning">⚠️ 发现 ' + registrations.length + ' 个Service Worker（需要清除）</div>';
+                    log('发现 ' + registrations.length + ' 个Service Worker', 'warning');
+                } else {
+                    html += '<div class="status success">✅ 没有Service Worker</div>';
+                    log('没有Service Worker', 'success');
+                }
+            }
+            
+            // 检查缓存
+            if ('caches' in window) {
+                const cacheNames = await caches.keys();
+                if (cacheNames.length > 0) {
+                    html += '<div class="status warning">⚠️ 发现 ' + cacheNames.length + ' 个缓存: ' + cacheNames.join(', ') + '</div>';
+                    log('发现 ' + cacheNames.length + ' 个缓存: ' + cacheNames.join(', '), 'warning');
+                } else {
+                    html += '<div class="status success">✅ 没有缓存</div>';
+                    log('没有缓存', 'success');
+                }
+            }
+            
+            statusDiv.innerHTML = html || '<div class="status info">ℹ️ 检查中...</div>';
+        }
+        
+        // 清除所有缓存
+        async function clearAllCaches() {
+            log('开始清除所有缓存...');
+            try {
+                if ('caches' in window) {
+                    const cacheNames = await caches.keys();
+                    log('找到 ' + cacheNames.length + ' 个缓存');
+                    
+                    for (const cacheName of cacheNames) {
+                        await caches.delete(cacheName);
+                        log('已删除缓存: ' + cacheName, 'success');
+                    }
+                    
+                    log('✅ 所有缓存已清除', 'success');
+                    alert('✅ 缓存清除成功！');
+                    checkStatus();
+                } else {
+                    log('❌ 浏览器不支持Cache API', 'error');
+                    alert('❌ 浏览器不支持缓存清除');
+                }
+            } catch (err) {
+                log('❌ 清除缓存失败: ' + err.message, 'error');
+                alert('❌ 清除缓存失败: ' + err.message);
+            }
+        }
+        
+        // 注销Service Worker
+        async function unregisterServiceWorkers() {
+            log('开始注销Service Worker...');
+            try {
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    log('找到 ' + registrations.length + ' 个Service Worker');
+                    
+                    for (const registration of registrations) {
+                        await registration.unregister();
+                        log('已注销Service Worker: ' + registration.scope, 'success');
+                    }
+                    
+                    log('✅ 所有Service Worker已注销', 'success');
+                    alert('✅ Service Worker注销成功！');
+                    checkStatus();
+                } else {
+                    log('❌ 浏览器不支持Service Worker', 'error');
+                    alert('❌ 浏览器不支持Service Worker');
+                }
+            } catch (err) {
+                log('❌ 注销Service Worker失败: ' + err.message, 'error');
+                alert('❌ 注销失败: ' + err.message);
+            }
+        }
+        
+        // 重新加载页面
+        function reloadPage() {
+            log('重新加载页面...');
+            setTimeout(() => {
+                location.reload(true);
+            }, 500);
+        }
+        
+        // 打开游戏
+        function goToGame() {
+            log('跳转到游戏...');
+            window.location.href = 'ZhiwuVSJiangshi/ZhiwuVSJiangshi/index.html';
+        }
+        
+        // 页面加载时检查状态
+        window.addEventListener('load', () => {
+            log('页面加载完成，开始检查状态...');
+            checkStatus();
+        });
+    </script>
+</body>
+</html>
+
