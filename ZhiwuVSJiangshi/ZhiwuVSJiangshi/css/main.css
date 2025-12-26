@@ -538,15 +538,20 @@ body {
 }
 
 /* 移动端竖屏模式 - 显示横屏提示 */
+/* 注意：现在由 JavaScript 控制显示，不再使用 CSS 自动显示 */
 @media (max-width: 920px) and (orientation: portrait) {
-    #orientation-notice {
-        display: flex !important;
-    }
+    /* #orientation-notice 的显示由 JavaScript 控制 */
     
     #game-container {
         filter: blur(10px);
         pointer-events: none;
     }
+}
+
+/* 当横屏提示显示时，模糊游戏容器 */
+#orientation-notice[style*="display: flex"] ~ #game-container {
+    filter: blur(10px);
+    pointer-events: none;
 }
 
 /* Loading Screen */
