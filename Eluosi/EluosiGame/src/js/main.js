@@ -67,6 +67,15 @@ class TetrisApp {
       highScore: document.getElementById('high-score'),
       linesCleared: document.getElementById('lines-cleared'),
       
+      // 移动端状态栏
+      mobileStatusBar: document.getElementById('mobile-status-bar'),
+      mobileScore: document.getElementById('mobile-score'),
+      mobileLevel: document.getElementById('mobile-level'),
+      mobileLines: document.getElementById('mobile-lines'),
+      
+      // 移动端控制按钮
+      mobileControls: document.getElementById('mobile-controls'),
+      
       // 按钮
       btnStart: document.getElementById('btn-start'),
       btnPause: document.getElementById('btn-pause'),
@@ -237,6 +246,61 @@ class TetrisApp {
     
     // 窗口大小变化
     window.addEventListener('resize', () => this.handleResize());
+    
+    // 移动端控制按钮
+    this.bindMobileControls();
+  }
+  
+  /**
+   * 绑定移动端控制按钮
+   */
+  bindMobileControls() {
+    if (!this.elements.mobileControls) return;
+    
+    const buttons = this.elements.mobileControls.querySelectorAll('.control-btn');
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const action = btn.dataset.action;
+        this.handleMobileControl(action);
+      });
+      
+      // 防止长按时的默认行为
+      btn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+      });
+      
+      btn.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        const action = btn.dataset.action;
+        this.handleMobileControl(action);
+      });
+    });
+  }
+  
+  /**
+   * 处理移动端控制
+   * @param {string} action
+   */
+  handleMobileControl(action) {
+    if (!this.game.isPlaying) return;
+    
+    switch (action) {
+      case 'left':
+        this.game.moveLeft();
+        break;
+      case 'right':
+        this.game.moveRight();
+        break;
+      case 'down':
+        this.game.moveDown();
+        break;
+      case 'rotate':
+        this.game.rotate();
+        break;
+      case 'drop':
+        this.game.hardDrop();
+        break;
+    }
   }
 
   /**
@@ -303,6 +367,9 @@ class TetrisApp {
     // 分数更新
     this.game.on(GAME_EVENTS.SCORE_UPDATE, ({ score }) => {
       this.elements.score.textContent = formatNumber(score);
+      if (this.elements.mobileScore) {
+        this.elements.mobileScore.textContent = formatNumber(score);
+      }
       this.elements.score.classList.add('animate-score-up');
       setTimeout(() => {
         this.elements.score.classList.remove('animate-score-up');
@@ -323,6 +390,9 @@ class TetrisApp {
     this.game.on(GAME_EVENTS.LINES_CLEAR, ({ count, lines }) => {
       const total = this.game.linesCleared;
       this.elements.linesCleared.textContent = total;
+      if (this.elements.mobileLines) {
+        this.elements.mobileLines.textContent = total;
+      }
       
       // 播放消行烟花效果
       if (this.effectsRenderer) {

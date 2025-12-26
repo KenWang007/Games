@@ -2,13 +2,23 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
     <meta name="description" content="植物大战僵尸网页版 - 适合儿童的卡通塔防游戏">
+    <!-- 建议横屏 -->
+    <meta name="screen-orientation" content="landscape">
+    <meta name="x5-orientation" content="landscape">
     <title>🌻 植物大战僵尸 🧟</title>
     <link rel="stylesheet" href="css/main.css">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌻</text></svg>">
 </head>
 <body>
+    <!-- 竖屏提示 -->
+    <div id="orientation-notice" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.95); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; padding: 20px;">
+        <div style="font-size: 60px; margin-bottom: 20px;">📱 ↻</div>
+        <h2 style="font-size: 24px; margin-bottom: 10px;">请横屏游玩</h2>
+        <p style="font-size: 16px; opacity: 0.8;">为了获得最佳游戏体验，请将设备横向</p>
+    </div>
+    
     <div id="game-container">
         <!-- Loading Screen -->
         <div class="loading-screen" id="loading-screen">

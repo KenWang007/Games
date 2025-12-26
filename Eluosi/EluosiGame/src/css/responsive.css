@@ -57,63 +57,71 @@
 /* 小屏幕（手机竖屏） */
 @media screen and (max-width: 480px) {
   :root {
-    --cell-size: 24px;
+    --cell-size: 20px;
     --border-radius: 12px;
     --border-radius-small: 6px;
   }
   
+  /* 重新布局游戏容器 - 单列布局 */
   #game-container {
+    display: flex;
+    flex-direction: column;
     padding: 5px;
+    gap: 5px;
+    max-height: 100vh;
   }
   
-  .panel {
-    padding: 8px 12px;
+  /* 隐藏左右侧面板 */
+  #left-panel,
+  #right-panel {
+    display: none !important;
   }
   
-  .panel-label {
-    font-size: 10px;
-    margin-bottom: 4px;
+  /* 顶部信息条 - 显示关键信息 */
+  #game-canvas-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 40px;
+    background: var(--panel-bg);
+    border-radius: var(--border-radius-small);
+    z-index: 1;
   }
   
-  #next-piece {
-    top: 5px;
-    left: 5px;
+  /* 游戏区域 */
+  #game-canvas-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    min-height: 0;
   }
   
-  #preview-canvas {
-    width: 70px;
-    height: 70px;
+  #game-canvas,
+  #bg-canvas,
+  #fx-canvas {
+    max-width: 100% !important;
+    max-height: calc(100vh - 200px) !important;
+    width: auto !important;
+    height: auto !important;
   }
   
-  #score-panel {
-    top: 5px;
-    right: 5px;
-    min-width: 100px;
-  }
-  
-  .stat {
-    margin-bottom: 8px;
-  }
-  
-  .stat-label {
-    font-size: 9px;
-  }
-  
-  .stat-value {
-    font-size: 16px;
-  }
-  
-  .level-icon {
-    font-size: 20px;
-  }
-  
-  .level-name {
-    font-size: 12px;
-  }
-  
+  /* 控制按钮区域 */
   #controls {
-    bottom: 5px;
+    position: relative;
+    bottom: auto;
+    left: auto;
+    transform: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     gap: 6px;
+    padding: 10px 5px;
+    flex-wrap: wrap;
   }
   
   .btn {
@@ -127,8 +135,81 @@
     font-size: 18px;
   }
   
+  /* 触摸控制按钮容器 */
+  #mobile-controls {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 8px;
+    padding: 10px;
+    background: var(--panel-bg);
+    border-radius: var(--border-radius);
+    max-width: 280px;
+    margin: 0 auto;
+  }
+  
+  #mobile-controls .control-btn {
+    min-height: 50px;
+    font-size: 20px;
+    background: linear-gradient(135deg, var(--btn-primary-start), var(--btn-primary-end));
+    color: white;
+    border: none;
+    border-radius: var(--border-radius-small);
+    box-shadow: var(--btn-shadow);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    touch-action: manipulation;
+    user-select: none;
+  }
+  
+  #mobile-controls .control-btn:active {
+    transform: scale(0.95);
+    box-shadow: 0 2px 8px rgba(79, 195, 247, 0.3);
+  }
+  
+  #mobile-controls .control-btn.rotate {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  
+  #mobile-controls .control-btn.left {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  
+  #mobile-controls .control-btn.down {
+    grid-column: 2;
+    grid-row: 2;
+  }
+  
+  #mobile-controls .control-btn.right {
+    grid-column: 3;
+    grid-row: 2;
+  }
+  
+  #mobile-controls .control-btn.drop {
+    grid-column: 1 / 4;
+    grid-row: 3;
+    background: linear-gradient(135deg, #FF6B9D, #FF8A80);
+  }
+  
+  .panel {
+    padding: 8px 12px;
+  }
+  
+  .panel-label {
+    font-size: 10px;
+    margin-bottom: 4px;
+  }
+  
   .modal-content {
     padding: 24px;
+    max-height: 90vh;
+    overflow-y: auto;
   }
   
   .modal-title {
@@ -174,6 +255,33 @@
   .toast {
     font-size: 18px;
     padding: 12px 24px;
+  }
+  
+  /* 顶部状态栏 */
+  #mobile-status-bar {
+    display: flex !important;
+    justify-content: space-around;
+    align-items: center;
+    background: var(--panel-bg);
+    border-radius: var(--border-radius-small);
+    padding: 8px;
+    margin-bottom: 5px;
+    box-shadow: var(--panel-shadow);
+  }
+  
+  #mobile-status-bar .status-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 10px;
+    color: var(--text-secondary);
+  }
+  
+  #mobile-status-bar .status-value {
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--text-primary);
+    margin-top: 2px;
   }
 }
 

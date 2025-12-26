@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
   <meta name="description" content="一款专为儿童设计的卡通风格俄罗斯方块游戏">
   <meta name="theme-color" content="#4FC3F7">
+  <!-- 锁定竖屏 -->
+  <meta name="screen-orientation" content="portrait">
+  <meta name="x5-orientation" content="portrait">
   <title>🎮 卡通俄罗斯方块 - 儿童版</title>
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/animations.css">
@@ -12,9 +15,32 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    /* 移动端隐藏的元素 */
+    #mobile-controls,
+    #mobile-status-bar {
+      display: none;
+    }
+  </style>
 </head>
 <body>
   <div id="game-container">
+    <!-- 移动端顶部状态栏 -->
+    <div id="mobile-status-bar">
+      <div class="status-item">
+        <span>分数</span>
+        <span class="status-value" id="mobile-score">0</span>
+      </div>
+      <div class="status-item">
+        <span>等级</span>
+        <span class="status-value" id="mobile-level">1</span>
+      </div>
+      <div class="status-item">
+        <span>行数</span>
+        <span class="status-value" id="mobile-lines">0</span>
+      </div>
+    </div>
+    
     <!-- 左侧面板区域 -->
     <div id="left-panel">
       <!-- 第1行：下一个方块预览 -->
@@ -92,6 +118,15 @@
       <button id="btn-music" class="btn btn-icon-only" title="音乐开关">
         🎵
       </button>
+    </div>
+    
+    <!-- 移动端触摸控制按钮 -->
+    <div id="mobile-controls">
+      <button class="control-btn rotate" data-action="rotate" title="旋转">🔄</button>
+      <button class="control-btn left" data-action="left" title="左移">⬅️</button>
+      <button class="control-btn down" data-action="down" title="下移">⬇️</button>
+      <button class="control-btn right" data-action="right" title="右移">➡️</button>
+      <button class="control-btn drop" data-action="drop" title="直接落下">⚡ 快速下落</button>
     </div>
     
     <!-- UI层（用于模态框） -->
