@@ -108,26 +108,30 @@ export class Game {
         // 保存当前DPI值
         this.currentDPR = dpr;
         
-        // 设置Canvas的内部像素尺寸
-        this.canvas.width = CANVAS_WIDTH * dpr;
-        this.canvas.height = CANVAS_HEIGHT * dpr;
+        // 先移除CSS的width/height，使用固定逻辑尺寸
+        this.canvas.style.width = '';
+        this.canvas.style.height = '';
         
-        // 设置Canvas的CSS显示尺寸（保持逻辑尺寸）
-        this.canvas.style.width = CANVAS_WIDTH + 'px';
-        this.canvas.style.height = CANVAS_HEIGHT + 'px';
+        // 获取Canvas容器的实际显示尺寸
+        const rect = this.canvas.getBoundingClientRect();
         
-        // 重新获取context（某些浏览器需要）
+        // 设置Canvas的内部像素尺寸（提高到物理像素）
+        this.canvas.width = rect.width * dpr;
+        this.canvas.height = rect.height * dpr;
+        
+        // 重新获取context（设置width/height会重置context）
         this.ctx = this.canvas.getContext('2d');
         
-        // 缩放绘图上下文，使游戏坐标系统保持不变
-        // 游戏代码继续使用CANVAS_WIDTH x CANVAS_HEIGHT的逻辑坐标
-        this.ctx.scale(dpr, dpr);
+        // 缩放绘图上下文以匹配显示尺寸和逻辑尺寸
+        const scaleX = rect.width / CANVAS_WIDTH;
+        const scaleY = rect.height / CANVAS_HEIGHT;
+        this.ctx.scale(scaleX * dpr, scaleY * dpr);
         
         // 设置图像渲染质量
         this.ctx.imageSmoothingEnabled = true;
         this.ctx.imageSmoothingQuality = 'high';
         
-        console.log(`📱 Canvas高清设置完成: DPI=${dpr}x, Canvas像素=${this.canvas.width}x${this.canvas.height}, CSS尺寸=${CANVAS_WIDTH}x${CANVAS_HEIGHT}, UserAgent=${navigator.userAgent.substring(0, 50)}...`);
+        console.log(`📱 Canvas高清设置: DPR=${dpr}x, 显示=${rect.width}x${rect.height}, Canvas=${this.canvas.width}x${this.canvas.height}, 逻辑=${CANVAS_WIDTH}x${CANVAS_HEIGHT}, scale=${scaleX*dpr},${scaleY*dpr}`);
     }
     
     /**

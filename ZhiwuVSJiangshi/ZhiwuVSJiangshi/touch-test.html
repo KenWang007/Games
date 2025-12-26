@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <title>🎮 触摸测试</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #1e1e1e;
+            color: white;
+            padding: 10px;
+        }
+        .container { max-width: 100%; margin: 0 auto; }
+        h1 { font-size: 20px; margin-bottom: 10px; text-align: center; }
+        .info {
+            background: #2d2d2d;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 12px;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+        }
+        #canvas {
+            border: 2px solid #4CAF50;
+            background: #000;
+            display: block;
+            width: 100%;
+            touch-action: none;
+        }
+        #log {
+            background: #2d2d2d;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            background: #4CAF50;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Canvas触摸测试</h1>
+        
+        <div class="info">
+            <div class="info-row">
+                <span>DPR:</span>
+                <span id="dpr">-</span>
+            </div>
+            <div class="info-row">
+                <span>Canvas尺寸:</span>
+                <span id="canvas-size">-</span>
+            </div>
+            <div class="info-row">
+                <span>显示尺寸:</span>
+                <span id="display-size">-</span>
+            </div>
+            <div class="info-row">
+                <span>最后触摸:</span>
+                <span id="last-touch">-</span>
+            </div>
+        </div>
+        
+        <canvas id="canvas" width="900" height="600"></canvas>
+        
+        <div id="log"></div>
+        
+        <button class="btn" onclick="location.href='index.html'">打开游戏</button>
+    </div>
+    
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const logDiv = document.getElementById('log');
+        
+        const CANVAS_WIDTH = 900;
+        const CANVAS_HEIGHT = 600;
+        
+        let touchCount = 0;
+        
+        function log(msg) {
+            const time = new Date().toLocaleTimeString();
+            logDiv.innerHTML = `[${time}] ${msg}<br>` + logDiv.innerHTML;
+            console.log(msg);
+        }
+        
+        function setupCanvas() {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            
+            // 设置Canvas内部分辨率
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            
+            // 缩放context
+            const scaleX = rect.width / CANVAS_WIDTH;
+            const scaleY = rect.height / CANVAS_HEIGHT;
+            ctx.scale(scaleX * dpr, scaleY * dpr);
+            
+            // 更新显示
+            document.getElementById('dpr').textContent = dpr + 'x';
+            document.getElementById('canvas-size').textContent = canvas.width + 'x' + canvas.height;
+            document.getElementById('display-size').textContent = Math.round(rect.width) + 'x' + Math.round(rect.height);
+            
+            log(`Canvas设置: DPR=${dpr}, 显示=${Math.round(rect.width)}x${Math.round(rect.height)}, Canvas=${canvas.width}x${canvas.height}, scale=${scaleX*dpr},${scaleY*dpr}`);
+            
+            // 绘制网格
+            drawGrid();
+        }
+        
+        function drawGrid() {
+            ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            
+            // 背景
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            
+            // 网格线
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            for (let x = 0; x <= CANVAS_WIDTH; x += 100) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, CANVAS_HEIGHT);
+                ctx.stroke();
+            }
+            for (let y = 0; y <= CANVAS_HEIGHT; y += 100) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(CANVAS_WIDTH, y);
+                ctx.stroke();
+            }
+            
+            // 中心十字
+            ctx.strokeStyle = '#4CAF50';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(CANVAS_WIDTH/2, 0);
+            ctx.lineTo(CANVAS_WIDTH/2, CANVAS_HEIGHT);
+            ctx.moveTo(0, CANVAS_HEIGHT/2);
+            ctx.lineTo(CANVAS_WIDTH, CANVAS_HEIGHT/2);
+            ctx.stroke();
+            
+            // 提示文字
+            ctx.fillStyle = '#4CAF50';
+            ctx.font = 'bold 24px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('点击任意位置测试', CANVAS_WIDTH/2, CANVAS_HEIGHT/2 - 20);
+            
+            ctx.font = '16px Arial';
+            ctx.fillText('触摸次数: ' + touchCount, CANVAS_WIDTH/2, CANVAS_HEIGHT/2 + 20);
+        }
+        
+        function getCanvasCoordinates(clientX, clientY) {
+            const rect = canvas.getBoundingClientRect();
+            const x = (clientX - rect.left) / rect.width * CANVAS_WIDTH;
+            const y = (clientY - rect.top) / rect.height * CANVAS_HEIGHT;
+            return { x, y };
+        }
+        
+        function handleTouch(clientX, clientY) {
+            const coords = getCanvasCoordinates(clientX, clientY);
+            touchCount++;
+            
+            log(`触摸 #${touchCount}: 屏幕(${Math.round(clientX)},${Math.round(clientY)}) → 逻辑(${Math.round(coords.x)},${Math.round(coords.y)})`);
+            document.getElementById('last-touch').textContent = `(${Math.round(coords.x)}, ${Math.round(coords.y)})`;
+            
+            // 绘制触摸点
+            drawGrid();
+            ctx.fillStyle = '#FF4444';
+            ctx.beginPath();
+            ctx.arc(coords.x, coords.y, 20, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 绘制坐标
+            ctx.fillStyle = '#FFD700';
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(`(${Math.round(coords.x)}, ${Math.round(coords.y)})`, coords.x, coords.y - 30);
+        }
+        
+        // 鼠标事件
+        canvas.addEventListener('click', (e) => {
+            handleTouch(e.clientX, e.clientY);
+        });
+        
+        // 触摸事件
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (e.touches.length > 0) {
+                const touch = e.touches[0];
+                handleTouch(touch.clientX, touch.clientY);
+            }
+        }, { passive: false });
+        
+        // 初始化
+        window.addEventListener('load', setupCanvas);
+        window.addEventListener('resize', setupCanvas);
+    </script>
+</body>
+</html>
+

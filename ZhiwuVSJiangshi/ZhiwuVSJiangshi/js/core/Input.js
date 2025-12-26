@@ -28,17 +28,20 @@ export class Input {
     }
     
     /**
-     * 获取相对于Canvas的坐标
+     * 获取相对于Canvas的坐标（逻辑坐标系）
      */
     getCanvasCoordinates(clientX, clientY) {
         const rect = this.canvas.getBoundingClientRect();
-        const scaleX = this.canvas.width / rect.width;
-        const scaleY = this.canvas.height / rect.height;
         
-        return {
-            x: (clientX - rect.left) * scaleX,
-            y: (clientY - rect.top) * scaleY
-        };
+        // 直接转换为逻辑坐标（900x600）
+        // 不使用canvas.width/height，因为高DPI下它们已经被缩放
+        const CANVAS_WIDTH = 900;
+        const CANVAS_HEIGHT = 600;
+        
+        const x = (clientX - rect.left) / rect.width * CANVAS_WIDTH;
+        const y = (clientY - rect.top) / rect.height * CANVAS_HEIGHT;
+        
+        return { x, y };
     }
     
     handleMouseMove(e) {
