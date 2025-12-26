@@ -149,6 +149,17 @@ export class GameStatsUI {
                 }
             }
             
+            /* 移动端横屏模式 - 完全隐藏统计面板 */
+            @media (max-width: 920px) and (orientation: landscape) {
+                #game-stats-sidebar {
+                    display: none !important;
+                }
+                
+                #game-stats-sidebar.visible {
+                    display: none !important;
+                }
+            }
+            
             .stats-header {
                 display: flex;
                 align-items: center;
