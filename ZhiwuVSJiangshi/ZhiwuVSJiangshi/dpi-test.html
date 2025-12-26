@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <title>🔍 高DPI屏幕测试</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        .card h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+        .test-canvas {
+            border: 2px solid #ddd;
+            margin: 10px 0;
+            display: block;
+            background: white;
+        }
+        .info {
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            margin: 5px;
+        }
+        .status.ok {
+            background: #10b981;
+            color: white;
+        }
+        .status.warning {
+            background: #f59e0b;
+            color: white;
+        }
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            background: #10b981;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 高DPI屏幕测试</h1>
+        
+        <div class="card">
+            <h2>📱 屏幕信息</h2>
+            <div class="info">
+                <strong>设备像素比 (DPR):</strong> <span id="dpr">-</span><br>
+                <strong>屏幕宽度:</strong> <span id="width">-</span>px<br>
+                <strong>屏幕高度:</strong> <span id="height">-</span>px<br>
+                <strong>物理像素宽度:</strong> <span id="physical-width">-</span>px<br>
+                <strong>物理像素高度:</strong> <span id="physical-height">-</span>px
+            </div>
+            <div id="dpr-status"></div>
+        </div>
+        
+        <div class="card">
+            <h2>🎨 Canvas对比测试</h2>
+            <p style="margin-bottom: 10px; color: #666;">下面两个Canvas绘制相同的文字和图形。左边是<strong>标准Canvas</strong>（可能模糊），右边是<strong>高DPI优化Canvas</strong>（应该清晰）。</p>
+            
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 200px;">
+                    <p style="font-weight: bold; margin-bottom: 5px;">❌ 标准Canvas（模糊）</p>
+                    <canvas id="canvas-normal" class="test-canvas" width="300" height="200"></canvas>
+                </div>
+                <div style="flex: 1; min-width: 200px;">
+                    <p style="font-weight: bold; margin-bottom: 5px;">✅ 高DPI Canvas（清晰）</p>
+                    <canvas id="canvas-hidpi" class="test-canvas" width="300" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>💡 说明</h2>
+            <p style="line-height: 1.6; color: #666;">
+                <strong>如果你看到右边的Canvas更清晰：</strong><br>
+                说明高DPI优化生效了！游戏已经修复模糊问题。<br><br>
+                <strong>如果两个Canvas看起来一样模糊：</strong><br>
+                可能是浏览器缓存问题，请清除缓存后重试。<br><br>
+                <strong>DPR值说明：</strong><br>
+                • 1.0 = 标准屏幕<br>
+                • 2.0 = 高清屏幕（iPhone Retina）<br>
+                • 3.0 = 超高清屏幕（小米/华为旗舰机）
+            </p>
+        </div>
+        
+        <div class="card">
+            <a href="index.html" class="btn">打开游戏测试</a>
+        </div>
+    </div>
+    
+    <script>
+        // 显示屏幕信息
+        const dpr = window.devicePixelRatio || 1;
+        document.getElementById('dpr').textContent = dpr;
+        document.getElementById('width').textContent = window.innerWidth;
+        document.getElementById('height').textContent = window.innerHeight;
+        document.getElementById('physical-width').textContent = Math.round(window.innerWidth * dpr);
+        document.getElementById('physical-height').textContent = Math.round(window.innerHeight * dpr);
+        
+        // DPR状态
+        const dprStatus = document.getElementById('dpr-status');
+        if (dpr >= 2) {
+            dprStatus.innerHTML = '<span class="status ok">✅ 高DPI屏幕检测到</span><span style="color: #666; margin-left: 10px;">需要优化防止模糊</span>';
+        } else {
+            dprStatus.innerHTML = '<span class="status warning">标准DPI屏幕</span><span style="color: #666; margin-left: 10px;">不需要特殊优化</span>';
+        }
+        
+        // 绘制测试内容
+        function drawTestContent(ctx, label) {
+            // 背景
+            ctx.fillStyle = '#f8f9fa';
+            ctx.fillRect(0, 0, 300, 200);
+            
+            // 标题
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 20px Arial';
+            ctx.fillText(label, 10, 30);
+            
+            // 测试文字（不同大小）
+            ctx.font = '16px Arial';
+            ctx.fillText('测试文字 Test Text', 10, 60);
+            
+            ctx.font = '12px Arial';
+            ctx.fillText('小字体测试 Small Font', 10, 85);
+            
+            // 绘制线条
+            ctx.strokeStyle = '#667eea';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(10, 100);
+            ctx.lineTo(290, 100);
+            ctx.stroke();
+            
+            // 绘制圆形
+            ctx.fillStyle = '#10b981';
+            ctx.beginPath();
+            ctx.arc(50, 140, 20, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 绘制矩形
+            ctx.fillStyle = '#f59e0b';
+            ctx.fillRect(90, 120, 40, 40);
+            
+            // 绘制三角形
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath();
+            ctx.moveTo(160, 120);
+            ctx.lineTo(180, 160);
+            ctx.lineTo(140, 160);
+            ctx.closePath();
+            ctx.fill();
+            
+            // DPR信息
+            ctx.fillStyle = '#666';
+            ctx.font = '10px Arial';
+            ctx.fillText(`DPR: ${dpr}`, 10, 190);
+        }
+        
+        // 标准Canvas（不优化）
+        const canvasNormal = document.getElementById('canvas-normal');
+        const ctxNormal = canvasNormal.getContext('2d');
+        drawTestContent(ctxNormal, '标准Canvas');
+        
+        // 高DPI Canvas（优化）
+        const canvasHiDPI = document.getElementById('canvas-hidpi');
+        const ctxHiDPI = canvasHiDPI.getContext('2d');
+        
+        // 应用高DPI优化
+        const width = canvasHiDPI.width;
+        const height = canvasHiDPI.height;
+        
+        canvasHiDPI.width = width * dpr;
+        canvasHiDPI.height = height * dpr;
+        canvasHiDPI.style.width = width + 'px';
+        canvasHiDPI.style.height = height + 'px';
+        
+        ctxHiDPI.scale(dpr, dpr);
+        ctxHiDPI.imageSmoothingEnabled = true;
+        ctxHiDPI.imageSmoothingQuality = 'high';
+        
+        drawTestContent(ctxHiDPI, '高DPI Canvas');
+    </script>
+</body>
+</html>
+

@@ -108,12 +108,12 @@ export class GameStatsUI {
      * 切换统计面板显示/隐藏
      */
     toggleStats() {
-        // 检查是否在移动端横屏模式
-        const isMobileLandscape = window.innerWidth <= 920 && window.matchMedia('(orientation: landscape)').matches;
+        // 检查是否在移动端
+        const isMobile = window.innerWidth <= 920;
         
-        if (isMobileLandscape && !this.isStatsVisible) {
-            // 在移动端横屏时，不允许显示统计面板
-            this.showToggleToast('横屏模式下无法显示统计面板');
+        if (isMobile && !this.isStatsVisible) {
+            // 在移动端不允许显示统计面板
+            this.showToggleToast('移动端无法显示统计面板');
             return;
         }
         
@@ -296,8 +296,8 @@ export class GameStatsUI {
                 }
             }
             
-            /* 移动端横屏模式 - 完全隐藏统计面板 */
-            @media (max-width: 920px) and (orientation: landscape) {
+            /* 移动端 - 完全隐藏统计面板（空间不足） */
+            @media (max-width: 920px) {
                 #game-stats-sidebar {
                     display: none !important;
                 }
@@ -467,6 +467,11 @@ export class GameStatsUI {
      * 显示侧边栏
      */
     show() {
+        // 移动端不显示统计面板
+        if (window.innerWidth <= 920) {
+            return;
+        }
+        
         if (this.sidebar && this.isStatsVisible) {
             this.sidebar.classList.add('visible');
         }
@@ -478,6 +483,11 @@ export class GameStatsUI {
      * 强制显示侧边栏（忽略用户偏好，用于初始化）
      */
     forceShow() {
+        // 移动端不显示统计面板
+        if (window.innerWidth <= 920) {
+            return;
+        }
+        
         if (this.sidebar) {
             this.sidebar.classList.add('visible');
         }

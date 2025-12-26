@@ -4,12 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
     <meta name="description" content="植物大战僵尸网页版 - 适合儿童的卡通塔防游戏">
+    <!-- 禁用缓存 -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <!-- 建议横屏 -->
     <meta name="screen-orientation" content="landscape">
     <meta name="x5-orientation" content="landscape">
     <title>🌻 植物大战僵尸 🧟</title>
-    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/main.css?v=20250126b">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌻</text></svg>">
+    <!-- 移动端强制隐藏统计面板 -->
+    <style id="mobile-stats-hide">
+        @media (max-width: 920px) {
+            #game-stats-sidebar,
+            #game-stats-sidebar.visible {
+                display: none !important;
+                visibility: hidden !important;
+                opacity: 0 !important;
+                pointer-events: none !important;
+            }
+            #btn-toggle-stats {
+                display: none !important;
+                visibility: hidden !important;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- 竖屏提示 -->
@@ -115,7 +135,53 @@
         </div>
     </div>
 
-    <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/main.js?v=20250126b"></script>
+    
+    <!-- 移动端强制隐藏统计面板脚本 -->
+    <script>
+        (function() {
+            function hideMobileStats() {
+                // 检测是否为移动端
+                if (window.innerWidth <= 920) {
+                    console.log('🚫 移动端检测 - 强制隐藏统计面板和切换按钮');
+                    
+                    // 隐藏统计面板
+                    const sidebar = document.getElementById('game-stats-sidebar');
+                    if (sidebar) {
+                        sidebar.style.display = 'none';
+                        sidebar.style.visibility = 'hidden';
+                        sidebar.style.opacity = '0';
+                        sidebar.classList.remove('visible');
+                        console.log('✅ 统计面板已隐藏');
+                    }
+                    
+                    // 隐藏切换按钮
+                    const toggleBtn = document.getElementById('btn-toggle-stats');
+                    if (toggleBtn) {
+                        toggleBtn.style.display = 'none';
+                        toggleBtn.style.visibility = 'hidden';
+                        console.log('✅ 切换按钮已隐藏');
+                    }
+                } else {
+                    console.log('💻 电脑端检测 - 统计面板功能正常');
+                }
+            }
+            
+            // 页面加载时立即执行
+            hideMobileStats();
+            
+            // DOM加载完成后再执行一次
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', hideMobileStats);
+            }
+            
+            // 窗口大小改变时重新检测
+            window.addEventListener('resize', hideMobileStats);
+            
+            // 定期检查（确保面板不会意外显示）
+            setInterval(hideMobileStats, 1000);
+        })();
+    </script>
     
     <!-- 设备检测和横屏提示脚本 -->
     <script>

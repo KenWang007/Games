@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>🔍 移动端诊断工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            color: #333;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .card h2 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+        .info-row {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        .label {
+            font-weight: 600;
+            color: #666;
+        }
+        .value {
+            color: #333;
+            text-align: right;
+            max-width: 60%;
+            word-break: break-all;
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .status.ok {
+            background: #10b981;
+            color: white;
+        }
+        .status.error {
+            background: #ef4444;
+            color: white;
+        }
+        .status.warning {
+            background: #f59e0b;
+            color: white;
+        }
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+        .btn:active {
+            transform: scale(0.98);
+        }
+        .btn-primary {
+            background: #10b981;
+            color: white;
+        }
+        .btn-secondary {
+            background: #6366f1;
+            color: white;
+        }
+        .emoji {
+            font-size: 48px;
+            text-align: center;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 移动端诊断工具</h1>
+        
+        <div class="card">
+            <h2>📱 设备信息</h2>
+            <div class="info-row">
+                <span class="label">屏幕宽度</span>
+                <span class="value" id="screen-width">-</span>
+            </div>
+            <div class="info-row">
+                <span class="label">屏幕高度</span>
+                <span class="value" id="screen-height">-</span>
+            </div>
+            <div class="info-row">
+                <span class="label">设备类型</span>
+                <span class="value" id="device-type">-</span>
+            </div>
+            <div class="info-row">
+                <span class="label">浏览器</span>
+                <span class="value" id="browser">-</span>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>✅ 检测结果</h2>
+            <div id="test-results"></div>
+            <div class="emoji" id="result-emoji">⏳</div>
+        </div>
+        
+        <div class="card">
+            <h2>🎮 操作</h2>
+            <a href="index.html" class="btn btn-primary">打开游戏</a>
+            <button onclick="location.reload()" class="btn btn-secondary">重新检测</button>
+        </div>
+        
+        <div class="card">
+            <h2>💡 说明</h2>
+            <p style="line-height: 1.6; color: #666;">
+                如果你的屏幕宽度 ≤ 920px，统计面板和切换按钮应该被隐藏。
+                如果你在游戏中仍然看到统计面板，请：
+                <br><br>
+                1️⃣ 清除浏览器缓存和数据<br>
+                2️⃣ 关闭浏览器重新打开<br>
+                3️⃣ 尝试使用其他浏览器（如Chrome）
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        function detectDevice() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const ua = navigator.userAgent;
+            
+            // 显示设备信息
+            document.getElementById('screen-width').textContent = width + 'px';
+            document.getElementById('screen-height').textContent = height + 'px';
+            
+            // 设备类型
+            let deviceType = '';
+            let isMobile = false;
+            if (width <= 920) {
+                deviceType = '移动端';
+                isMobile = true;
+            } else if (width <= 1200) {
+                deviceType = '平板/小屏电脑';
+            } else {
+                deviceType = '电脑端';
+            }
+            document.getElementById('device-type').textContent = deviceType;
+            
+            // 浏览器检测
+            let browser = 'Unknown';
+            if (ua.indexOf('MiuiBrowser') > -1) {
+                browser = '小米浏览器';
+            } else if (ua.indexOf('Chrome') > -1) {
+                browser = 'Chrome';
+            } else if (ua.indexOf('Safari') > -1) {
+                browser = 'Safari';
+            } else if (ua.indexOf('Firefox') > -1) {
+                browser = 'Firefox';
+            }
+            document.getElementById('browser').textContent = browser;
+            
+            // 测试结果
+            const resultsDiv = document.getElementById('test-results');
+            let resultsHTML = '';
+            let allOk = true;
+            
+            if (isMobile) {
+                resultsHTML += `
+                    <div class="info-row">
+                        <span class="label">移动端检测</span>
+                        <span class="status ok">✅ 是移动端</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">统计面板应该</span>
+                        <span class="status ok">✅ 隐藏</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">切换按钮应该</span>
+                        <span class="status ok">✅ 隐藏</span>
+                    </div>
+                `;
+                document.getElementById('result-emoji').textContent = '📱✅';
+            } else {
+                resultsHTML += `
+                    <div class="info-row">
+                        <span class="label">设备检测</span>
+                        <span class="status ok">✅ 电脑端</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">统计面板应该</span>
+                        <span class="status ok">✅ 可用</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">切换按钮应该</span>
+                        <span class="status ok">✅ 显示</span>
+                    </div>
+                `;
+                document.getElementById('result-emoji').textContent = '💻✅';
+            }
+            
+            resultsDiv.innerHTML = resultsHTML;
+        }
+        
+        // 页面加载时运行
+        window.addEventListener('load', detectDevice);
+        
+        // 窗口大小改变时重新检测
+        window.addEventListener('resize', detectDevice);
+    </script>
+</body>
+</html>
+

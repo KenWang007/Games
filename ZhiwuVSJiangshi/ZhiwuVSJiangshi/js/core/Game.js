@@ -35,8 +35,9 @@ export class Game {
         // Canvas设置
         this.canvas = document.getElementById(canvasId);
         this.ctx = this.canvas.getContext('2d');
-        this.canvas.width = CANVAS_WIDTH;
-        this.canvas.height = CANVAS_HEIGHT;
+        
+        // 设置Canvas尺寸并支持高DPI屏幕
+        this.setupCanvas();
         
         // 游戏状态
         this.state = GAME_STATE.MENU;
@@ -95,6 +96,31 @@ export class Game {
         };
         
         this.init();
+    }
+    
+    /**
+     * 设置Canvas以支持高DPI屏幕（防止模糊）
+     */
+    setupCanvas() {
+        // 获取设备像素比（高DPI屏幕如小米手机通常是2-3）
+        const dpr = window.devicePixelRatio || 1;
+        
+        // 设置Canvas的内部像素尺寸
+        this.canvas.width = CANVAS_WIDTH * dpr;
+        this.canvas.height = CANVAS_HEIGHT * dpr;
+        
+        // 缩放绘图上下文，使游戏坐标系统保持不变
+        // 游戏代码继续使用CANVAS_WIDTH x CANVAS_HEIGHT的逻辑坐标
+        this.ctx.scale(dpr, dpr);
+        
+        // 设置图像渲染质量
+        this.ctx.imageSmoothingEnabled = true;
+        this.ctx.imageSmoothingQuality = 'high';
+        
+        // 设置文本渲染质量
+        this.ctx.textRendering = 'optimizeLegibility';
+        
+        console.log(`📱 Canvas高清设置完成: DPI=${dpr}x, 分辨率=${this.canvas.width}x${this.canvas.height}, 逻辑尺寸=${CANVAS_WIDTH}x${CANVAS_HEIGHT}`);
     }
     
     /**

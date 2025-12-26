@@ -426,6 +426,11 @@ body {
     #orientation-notice {
         display: none !important;
     }
+    
+    /* 移动端隐藏统计面板切换按钮（空间不足，统计面板体验不佳） */
+    #btn-toggle-stats {
+        display: none !important;
+    }
 }
 
 /* 移动端优化 - 横屏模式 */

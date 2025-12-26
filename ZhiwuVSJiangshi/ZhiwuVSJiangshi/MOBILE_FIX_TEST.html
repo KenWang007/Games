@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>移动端修复测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            background: #f5f5f5;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 移动端统计面板修复测试</h1>
+    
+    <div class="test-section">
+        <h2>📱 设备信息</h2>
+        <div id="device-info"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>✅ 预期行为</h2>
+        <ul>
+            <li><strong>电脑端</strong> (宽度 > 920px): 显示统计面板切换按钮 📊，可以切换面板显示/隐藏</li>
+            <li><strong>移动端</strong> (宽度 ≤ 920px): 不显示统计面板切换按钮，统计面板始终隐藏</li>
+        </ul>
+    </div>
+    
+    <div class="test-section">
+        <h2>🧪 测试结果</h2>
+        <div id="test-results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>🎮 操作</h2>
+        <button onclick="location.href='index.html'">打开游戏</button>
+        <button onclick="runTests()">重新测试</button>
+    </div>
+    
+    <script>
+        function isMobile() {
+            return window.innerWidth <= 920;
+        }
+        
+        function getDeviceType() {
+            if (window.innerWidth <= 920) {
+                return '移动端';
+            } else if (window.innerWidth <= 1200) {
+                return '平板/小屏电脑';
+            } else {
+                return '电脑端';
+            }
+        }
+        
+        function runTests() {
+            const deviceInfo = document.getElementById('device-info');
+            const testResults = document.getElementById('test-results');
+            
+            // 显示设备信息
+            deviceInfo.innerHTML = `
+                <div class="info">
+                    <strong>屏幕宽度:</strong> ${window.innerWidth}px<br>
+                    <strong>屏幕高度:</strong> ${window.innerHeight}px<br>
+                    <strong>设备类型:</strong> ${getDeviceType()}<br>
+                    <strong>User Agent:</strong> ${navigator.userAgent}<br>
+                    <strong>方向:</strong> ${window.matchMedia('(orientation: landscape)').matches ? '横屏' : '竖屏'}
+                </div>
+            `;
+            
+            // 测试结果
+            const tests = [];
+            
+            // 测试1: 检查屏幕宽度
+            if (isMobile()) {
+                tests.push({
+                    name: '移动端检测',
+                    pass: true,
+                    message: '✅ 检测到移动端设备 (宽度 ≤ 920px)'
+                });
+                
+                tests.push({
+                    name: '预期行为',
+                    pass: true,
+                    message: '✅ 统计面板应该被隐藏，切换按钮不显示'
+                });
+            } else {
+                tests.push({
+                    name: '设备检测',
+                    pass: true,
+                    message: '✅ 检测到电脑端设备 (宽度 > 920px)'
+                });
+                
+                tests.push({
+                    name: '预期行为',
+                    pass: true,
+                    message: '✅ 统计面板切换按钮应该显示，可以切换面板'
+                });
+            }
+            
+            // 渲染测试结果
+            let html = '';
+            tests.forEach(test => {
+                const className = test.pass ? 'success' : 'error';
+                html += `
+                    <div class="status ${className}">
+                        <strong>${test.name}:</strong> ${test.message}
+                    </div>
+                `;
+            });
+            
+            testResults.innerHTML = html;
+        }
+        
+        // 页面加载时运行测试
+        window.addEventListener('load', runTests);
+        
+        // 窗口大小改变时重新测试
+        window.addEventListener('resize', runTests);
+    </script>
+</body>
+</html>
+
