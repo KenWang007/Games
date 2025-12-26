@@ -435,6 +435,11 @@ body {
         height: 100%;
     }
     
+    /* 隐藏右侧统计信息面板 */
+    #game-stats-sidebar {
+        display: none !important;
+    }
+    
     /* 优化顶部栏 */
     .top-bar {
         padding: 5px;
