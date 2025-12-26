@@ -29,10 +29,13 @@ export class GameStatsUI {
         // 用户偏好设置 - 从localStorage读取
         this.isStatsVisible = this.loadStatsPreference();
         
+        // 按钮绑定标志
+        this.buttonBound = false;
+        
         // 创建HTML侧边栏
         this.createSidebar();
         
-        // 绑定切换按钮事件
+        // 绑定切换按钮事件（延迟执行）
         this.bindToggleButton();
         
         // 应用初始显示状态
@@ -79,15 +82,26 @@ export class GameStatsUI {
      * 绑定切换按钮事件
      */
     bindToggleButton() {
-        const toggleBtn = document.getElementById('btn-toggle-stats');
-        if (toggleBtn) {
-            toggleBtn.addEventListener('click', () => {
-                this.toggleStats();
-            });
-            
-            // 更新按钮图标
-            this.updateToggleButton();
-        }
+        // 使用 setTimeout 确保 DOM 完全加载
+        setTimeout(() => {
+            const toggleBtn = document.getElementById('btn-toggle-stats');
+            if (toggleBtn) {
+                // 移除可能存在的旧事件监听器
+                toggleBtn.replaceWith(toggleBtn.cloneNode(true));
+                const newBtn = document.getElementById('btn-toggle-stats');
+                
+                newBtn.addEventListener('click', () => {
+                    console.log('统计面板切换按钮被点击');
+                    this.toggleStats();
+                });
+                
+                // 更新按钮图标
+                this.updateToggleButton();
+                console.log('统计面板切换按钮已绑定');
+            } else {
+                console.warn('未找到统计面板切换按钮 #btn-toggle-stats');
+            }
+        }, 500);
     }
     
     /**
@@ -456,6 +470,8 @@ export class GameStatsUI {
         if (this.sidebar && this.isStatsVisible) {
             this.sidebar.classList.add('visible');
         }
+        // 确保按钮已绑定
+        this.ensureButtonBound();
     }
     
     /**
@@ -464,6 +480,18 @@ export class GameStatsUI {
     forceShow() {
         if (this.sidebar) {
             this.sidebar.classList.add('visible');
+        }
+        // 确保按钮已绑定
+        this.ensureButtonBound();
+    }
+    
+    /**
+     * 确保切换按钮已绑定
+     */
+    ensureButtonBound() {
+        if (!this.buttonBound) {
+            this.bindToggleButton();
+            this.buttonBound = true;
         }
     }
     
