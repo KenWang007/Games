@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <title>🧪 完整测试工具</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        .container { max-width: 800px; margin: 0 auto; }
+        h1 { font-size: 24px; margin-bottom: 20px; text-align: center; }
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        .card h2 { font-size: 18px; margin-bottom: 15px; color: #667eea; }
+        .info-row {
+            padding: 8px;
+            margin: 5px 0;
+            background: #f8f9fa;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .label { font-weight: 600; color: #666; }
+        .value { color: #333; font-family: monospace; }
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            margin: 5px;
+        }
+        .status.ok { background: #10b981; color: white; }
+        .status.error { background: #ef4444; color: white; }
+        .status.warning { background: #f59e0b; color: white; }
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            background: #10b981;
+            color: white;
+        }
+        .test-canvas {
+            border: 2px solid #ddd;
+            margin: 10px 0;
+            background: white;
+        }
+        #log {
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 10px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 完整测试工具</h1>
+        
+        <div class="card">
+            <h2>📱 设备信息</h2>
+            <div class="info-row">
+                <span class="label">屏幕宽度</span>
+                <span class="value" id="width">-</span>
+            </div>
+            <div class="info-row">
+                <span class="label">屏幕高度</span>
+                <span class="value" id="height">-</span>
+            </div>
+            <div class="info-row">
+                <span class="label">DPR（像素比）</span>
+                <span class="value" id="dpr">-</span>
+            </div>
+            <div class="info-row">
+                <span class="label">方向</span>
+                <span class="value" id="orientation">-</span>
+            </div>
+            <div class="info-row">
+                <span class="label">User Agent</span>
+                <span class="value" id="ua" style="font-size: 10px; word-break: break-all;">-</span>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>✅ 测试结果</h2>
+            <div id="test-results"></div>
+        </div>
+        
+        <div class="card">
+            <h2>🎨 Canvas清晰度测试</h2>
+            <p style="margin-bottom: 10px; font-size: 14px;">下面的文字应该清晰可读，如果模糊说明高DPI未生效：</p>
+            <canvas id="test-canvas" class="test-canvas" width="600" height="100"></canvas>
+        </div>
+        
+        <div class="card">
+            <h2>📋 控制台日志</h2>
+            <div id="log"></div>
+        </div>
+        
+        <div class="card">
+            <button class="btn" onclick="location.href='index.html'">打开游戏</button>
+            <button class="btn" onclick="location.reload()">重新测试</button>
+        </div>
+    </div>
+    
+    <script>
+        const log = (msg) => {
+            const logDiv = document.getElementById('log');
+            const time = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${time}] ${msg}<br>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(msg);
+        };
+        
+        function runTests() {
+            // 获取设备信息
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const dpr = window.devicePixelRatio || 1;
+            const isPortrait = window.matchMedia('(orientation: portrait)').matches;
+            const orientation = isPortrait ? '竖屏 📱' : '横屏 📱↻';
+            const ua = navigator.userAgent;
+            
+            // 显示设备信息
+            document.getElementById('width').textContent = width + 'px';
+            document.getElementById('height').textContent = height + 'px';
+            document.getElementById('dpr').textContent = dpr + 'x';
+            document.getElementById('orientation').textContent = orientation;
+            document.getElementById('ua').textContent = ua;
+            
+            log(`设备信息: ${width}x${height}, DPR=${dpr}, ${orientation}`);
+            
+            // 运行测试
+            const results = [];
+            
+            // 测试1: DPI检测
+            if (dpr >= 2) {
+                results.push({
+                    name: 'DPI检测',
+                    status: 'ok',
+                    message: `高DPI屏幕 (${dpr}x)，需要优化`
+                });
+                log(`✅ 高DPI屏幕检测: ${dpr}x`);
+            } else {
+                results.push({
+                    name: 'DPI检测',
+                    status: 'ok',
+                    message: `标准DPI屏幕 (${dpr}x)`
+                });
+                log(`ℹ️ 标准DPI屏幕: ${dpr}x`);
+            }
+            
+            // 测试2: 移动端检测
+            const isMobile = width <= 920;
+            if (isMobile) {
+                results.push({
+                    name: '移动端检测',
+                    status: 'ok',
+                    message: '移动设备 - 统计面板应隐藏'
+                });
+                log(`✅ 移动端检测: ${width}px ≤ 920px`);
+            } else {
+                results.push({
+                    name: '设备检测',
+                    status: 'ok',
+                    message: '桌面设备 - 统计面板可用'
+                });
+                log(`ℹ️ 桌面设备: ${width}px > 920px`);
+            }
+            
+            // 测试3: 横屏检测
+            if (isMobile && isPortrait) {
+                results.push({
+                    name: '横屏提示',
+                    status: 'warning',
+                    message: '竖屏模式 - 应该显示横屏提示'
+                });
+                log(`⚠️ 移动端竖屏: 应显示横屏提示`);
+            } else if (isMobile && !isPortrait) {
+                results.push({
+                    name: '横屏检测',
+                    status: 'ok',
+                    message: '横屏模式 - 正常游玩'
+                });
+                log(`✅ 移动端横屏: 可正常游玩`);
+            }
+            
+            // 测试4: Service Worker
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(regs => {
+                    if (regs.length > 0) {
+                        results.push({
+                            name: 'Service Worker',
+                            status: 'warning',
+                            message: `发现${regs.length}个SW - 可能缓存旧版本`
+                        });
+                        log(`⚠️ Service Worker: ${regs.length}个`);
+                    } else {
+                        results.push({
+                            name: 'Service Worker',
+                            status: 'ok',
+                            message: '无Service Worker - 无缓存'
+                        });
+                        log(`✅ 无Service Worker`);
+                    }
+                    updateResults(results);
+                });
+            }
+            
+            // 测试5: 缓存
+            if ('caches' in window) {
+                caches.keys().then(names => {
+                    if (names.length > 0) {
+                        results.push({
+                            name: '缓存',
+                            status: 'warning',
+                            message: `发现${names.length}个缓存`
+                        });
+                        log(`⚠️ 缓存: ${names.join(', ')}`);
+                    } else {
+                        results.push({
+                            name: '缓存',
+                            status: 'ok',
+                            message: '无缓存'
+                        });
+                        log(`✅ 无缓存`);
+                    }
+                    updateResults(results);
+                });
+            }
+            
+            // 测试Canvas高DPI
+            testCanvas();
+            
+            // 初次显示结果
+            updateResults(results);
+        }
+        
+        function updateResults(results) {
+            const resultsDiv = document.getElementById('test-results');
+            let html = '';
+            results.forEach(r => {
+                html += `<div><span class="status ${r.status}">${r.name}</span> ${r.message}</div>`;
+            });
+            resultsDiv.innerHTML = html;
+        }
+        
+        function testCanvas() {
+            const canvas = document.getElementById('test-canvas');
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            
+            // 应用高DPI
+            canvas.width = 600 * dpr;
+            canvas.height = 100 * dpr;
+            canvas.style.width = '600px';
+            canvas.style.height = '100px';
+            ctx.scale(dpr, dpr);
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            
+            // 绘制测试内容
+            ctx.fillStyle = '#f8f9fa';
+            ctx.fillRect(0, 0, 600, 100);
+            
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 24px Arial';
+            ctx.fillText('高DPI测试 - 这段文字应该清晰', 20, 40);
+            
+            ctx.font = '16px Arial';
+            ctx.fillText(`DPR=${dpr}, Canvas=${canvas.width}x${canvas.height}`, 20, 70);
+            
+            log(`Canvas测试: DPR=${dpr}, 分辨率=${canvas.width}x${canvas.height}`);
+        }
+        
+        // 页面加载时运行
+        window.addEventListener('load', runTests);
+        window.addEventListener('resize', runTests);
+        window.addEventListener('orientationchange', () => setTimeout(runTests, 100));
+    </script>
+</body>
+</html>
+

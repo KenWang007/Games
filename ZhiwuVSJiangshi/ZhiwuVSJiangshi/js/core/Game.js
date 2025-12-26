@@ -105,9 +105,19 @@ export class Game {
         // 获取设备像素比（高DPI屏幕如小米手机通常是2-3）
         const dpr = window.devicePixelRatio || 1;
         
+        // 保存当前DPI值
+        this.currentDPR = dpr;
+        
         // 设置Canvas的内部像素尺寸
         this.canvas.width = CANVAS_WIDTH * dpr;
         this.canvas.height = CANVAS_HEIGHT * dpr;
+        
+        // 设置Canvas的CSS显示尺寸（保持逻辑尺寸）
+        this.canvas.style.width = CANVAS_WIDTH + 'px';
+        this.canvas.style.height = CANVAS_HEIGHT + 'px';
+        
+        // 重新获取context（某些浏览器需要）
+        this.ctx = this.canvas.getContext('2d');
         
         // 缩放绘图上下文，使游戏坐标系统保持不变
         // 游戏代码继续使用CANVAS_WIDTH x CANVAS_HEIGHT的逻辑坐标
@@ -117,10 +127,7 @@ export class Game {
         this.ctx.imageSmoothingEnabled = true;
         this.ctx.imageSmoothingQuality = 'high';
         
-        // 设置文本渲染质量
-        this.ctx.textRendering = 'optimizeLegibility';
-        
-        console.log(`📱 Canvas高清设置完成: DPI=${dpr}x, 分辨率=${this.canvas.width}x${this.canvas.height}, 逻辑尺寸=${CANVAS_WIDTH}x${CANVAS_HEIGHT}`);
+        console.log(`📱 Canvas高清设置完成: DPI=${dpr}x, Canvas像素=${this.canvas.width}x${this.canvas.height}, CSS尺寸=${CANVAS_WIDTH}x${CANVAS_HEIGHT}, UserAgent=${navigator.userAgent.substring(0, 50)}...`);
     }
     
     /**
@@ -183,6 +190,15 @@ export class Game {
         
         // 更新菜单显示
         this.updateMenuDisplay();
+        
+        // 监听窗口大小变化，重新设置Canvas
+        window.addEventListener('resize', () => {
+            const newDPR = window.devicePixelRatio || 1;
+            if (newDPR !== this.currentDPR) {
+                console.log(`📱 检测到DPI变化: ${this.currentDPR} → ${newDPR}，重新设置Canvas`);
+                this.setupCanvas();
+            }
+        });
         
         // 开始游戏循环
         this.gameLoop(0);
