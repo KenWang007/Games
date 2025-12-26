@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="description" content="植物大战僵尸网页版 - 适合儿童的卡通塔防游戏">
+    <title>🌻 植物大战僵尸 🧟</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌻</text></svg>">
+</head>
+<body>
+    <div id="game-container">
+        <!-- Loading Screen -->
+        <div class="loading-screen" id="loading-screen">
+            <h1 class="loading-title">🌻 植物大战僵尸 🧟</h1>
+            <div class="loading-bar">
+                <div class="loading-progress" id="loading-progress"></div>
+            </div>
+            <p class="loading-text" id="loading-text">正在加载游戏...</p>
+        </div>
+
+        <!-- Game Canvas -->
+        <canvas id="game-canvas"></canvas>
+
+        <!-- UI Layer -->
+        <div id="ui-layer">
+            <!-- Top Bar with Cards -->
+            <div class="top-bar" id="top-bar">
+                <!-- Sun Counter -->
+                <div class="sun-counter">
+                    <div class="sun-icon"></div>
+                    <span class="sun-value" id="sun-value">50</span>
+                </div>
+
+                <!-- Card Bar (植物卡片会动态添加) -->
+                <div class="card-bar" id="card-bar">
+                    <!-- Cards will be inserted here -->
+                </div>
+                
+                <!-- Shovel Tool -->
+                <div class="shovel-container" id="shovel-container" title="铲子 - 移除植物">
+                    <div class="shovel-icon">⛏️</div>
+                </div>
+
+                <!-- Control Buttons -->
+                <div class="control-buttons">
+                    <button class="btn" id="btn-almanac" title="图鉴">📖</button>
+                    <button class="btn" id="btn-pause" title="暂停">⏸️</button>
+                    <button class="btn" id="btn-sound" title="音效">🔊</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menu Screen -->
+        <div class="overlay-screen menu-screen" id="menu-screen">
+            <h1 class="overlay-title">🌻 植物大战僵尸 🧟</h1>
+            <p class="overlay-subtitle">保护你的家园！</p>
+            <div class="menu-stats" id="menu-stats"></div>
+            <button class="overlay-btn" id="btn-start">开始游戏</button>
+            <div class="menu-buttons">
+                <button class="menu-small-btn" id="btn-difficulty">🎮 选择难度</button>
+                <button class="menu-small-btn" id="btn-menu-almanac">📖 图鉴</button>
+                <button class="menu-small-btn" id="btn-menu-reset">🔄 重置进度</button>
+            </div>
+        </div>
+
+        <!-- Win Screen -->
+        <div class="overlay-screen win-screen" id="win-screen">
+            <h1 class="overlay-title">🎉 胜利啦！🎉</h1>
+            <p class="overlay-subtitle">你成功保护了家园！</p>
+            <div class="star-rating" id="star-rating">
+                <span class="star">⭐</span>
+                <span class="star">⭐</span>
+                <span class="star">⭐</span>
+            </div>
+            <button class="overlay-btn" id="btn-next">下一关</button>
+        </div>
+
+        <!-- Lose Screen -->
+        <div class="overlay-screen lose-screen" id="lose-screen">
+            <h1 class="overlay-title">😢 僵尸入侵了</h1>
+            <p class="overlay-subtitle">别灰心，再试一次！</p>
+            <button class="overlay-btn" id="btn-retry">重新开始</button>
+        </div>
+
+        <!-- Pause Screen -->
+        <div class="overlay-screen pause-screen" id="pause-screen">
+            <h1 class="overlay-title">⏸️ 游戏暂停</h1>
+            <div class="pause-buttons">
+                <button class="overlay-btn" id="btn-resume">继续游戏</button>
+                <button class="overlay-btn secondary" id="btn-pause-almanac">📖 查看图鉴</button>
+                <button class="overlay-btn secondary" id="btn-quit">🏠 返回主菜单</button>
+            </div>
+        </div>
+
+        <!-- Reset Confirm Dialog -->
+        <div class="overlay-screen confirm-screen" id="confirm-screen">
+            <h1 class="overlay-title">⚠️ 确认重置</h1>
+            <p class="overlay-subtitle">这将清除所有游戏进度，确定要重置吗？</p>
+            <div class="confirm-buttons">
+                <button class="overlay-btn danger" id="btn-confirm-reset">确认重置</button>
+                <button class="overlay-btn secondary" id="btn-cancel-reset">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>

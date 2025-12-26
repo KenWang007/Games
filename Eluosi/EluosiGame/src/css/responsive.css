@@ -1,0 +1,344 @@
+/* ============================================
+   卡通俄罗斯方块 - 响应式样式
+   ============================================ */
+
+/* 大屏幕（桌面） */
+@media screen and (min-width: 768px) {
+  :root {
+    --cell-size: 32px;
+  }
+  
+  #game-container {
+    max-width: 600px;
+    max-height: 900px;
+  }
+  
+  .panel {
+    padding: 16px 20px;
+  }
+  
+  .stat-value {
+    font-size: 24px;
+  }
+  
+  .level-icon {
+    font-size: 28px;
+  }
+  
+  .level-name {
+    font-size: 16px;
+  }
+  
+  .modal-content {
+    padding: 40px;
+  }
+  
+  .game-title {
+    font-size: 40px;
+  }
+  
+  .btn-large {
+    padding: 18px 40px;
+    font-size: 20px;
+  }
+}
+
+/* 中等屏幕（平板） */
+@media screen and (min-width: 481px) and (max-width: 767px) {
+  :root {
+    --cell-size: 28px;
+  }
+  
+  #game-container {
+    max-width: 500px;
+  }
+}
+
+/* 小屏幕（手机竖屏） */
+@media screen and (max-width: 480px) {
+  :root {
+    --cell-size: 24px;
+    --border-radius: 12px;
+    --border-radius-small: 6px;
+  }
+  
+  #game-container {
+    padding: 5px;
+  }
+  
+  .panel {
+    padding: 8px 12px;
+  }
+  
+  .panel-label {
+    font-size: 10px;
+    margin-bottom: 4px;
+  }
+  
+  #next-piece {
+    top: 5px;
+    left: 5px;
+  }
+  
+  #preview-canvas {
+    width: 70px;
+    height: 70px;
+  }
+  
+  #score-panel {
+    top: 5px;
+    right: 5px;
+    min-width: 100px;
+  }
+  
+  .stat {
+    margin-bottom: 8px;
+  }
+  
+  .stat-label {
+    font-size: 9px;
+  }
+  
+  .stat-value {
+    font-size: 16px;
+  }
+  
+  .level-icon {
+    font-size: 20px;
+  }
+  
+  .level-name {
+    font-size: 12px;
+  }
+  
+  #controls {
+    bottom: 5px;
+    gap: 6px;
+  }
+  
+  .btn {
+    padding: 10px 16px;
+    font-size: 12px;
+  }
+  
+  .btn-icon-only {
+    width: 38px;
+    height: 38px;
+    font-size: 18px;
+  }
+  
+  .modal-content {
+    padding: 24px;
+  }
+  
+  .modal-title {
+    font-size: 24px;
+  }
+  
+  .game-title {
+    font-size: 26px;
+  }
+  
+  .game-subtitle {
+    font-size: 12px;
+  }
+  
+  .instructions {
+    padding: 12px;
+  }
+  
+  .instructions h3 {
+    font-size: 12px;
+  }
+  
+  .instruction-item {
+    font-size: 11px;
+  }
+  
+  .key {
+    min-width: 30px;
+    height: 24px;
+    font-size: 10px;
+  }
+  
+  .btn-large {
+    padding: 14px 28px;
+    font-size: 16px;
+  }
+  
+  .new-record-badge {
+    font-size: 14px;
+    padding: 6px 16px;
+  }
+  
+  .toast {
+    font-size: 18px;
+    padding: 12px 24px;
+  }
+}
+
+/* 超小屏幕 */
+@media screen and (max-width: 360px) {
+  :root {
+    --cell-size: 20px;
+  }
+  
+  .game-title {
+    font-size: 22px;
+  }
+  
+  .instruction-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .stat-value {
+    font-size: 14px;
+  }
+  
+  .level-icon {
+    font-size: 18px;
+  }
+  
+  .level-name {
+    font-size: 11px;
+  }
+}
+
+/* 横屏模式 */
+@media screen and (orientation: landscape) and (max-height: 500px) {
+  #game-container {
+    flex-direction: row;
+    max-width: none;
+    max-height: 100vh;
+    padding: 10px;
+  }
+  
+  #ui-layer {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  
+  #next-piece {
+    position: static;
+    order: 1;
+  }
+  
+  #score-panel {
+    position: static;
+    order: 3;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  
+  .stat {
+    margin-bottom: 0;
+  }
+  
+  #controls {
+    position: static;
+    order: 2;
+    transform: none;
+    flex-direction: column;
+  }
+  
+  .modal-content {
+    max-width: 500px;
+    padding: 20px;
+  }
+  
+  .modal-title {
+    font-size: 22px;
+    margin-bottom: 12px;
+  }
+  
+  .game-over-stats {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+  }
+  
+  .stat-row {
+    flex-direction: column;
+    border-bottom: none;
+    padding: 0;
+  }
+}
+
+/* 触摸设备优化 */
+@media (hover: none) and (pointer: coarse) {
+  .btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .btn-icon-only {
+    width: 48px;
+    height: 48px;
+  }
+  
+  /* 触摸区域指示 */
+  #game-canvas {
+    cursor: pointer;
+  }
+  
+  /* 移除悬停效果 */
+  .btn:hover {
+    transform: none;
+  }
+  
+  .btn:active {
+    transform: scale(0.95);
+  }
+}
+
+/* 高对比度模式 */
+@media (prefers-contrast: high) {
+  :root {
+    --panel-bg: rgba(255, 255, 255, 1);
+    --text-primary: #000000;
+    --text-secondary: #333333;
+  }
+  
+  .btn {
+    border: 2px solid currentColor;
+  }
+  
+  #game-canvas {
+    border: 2px solid #000;
+  }
+}
+
+/* 暗色模式（可选） */
+@media (prefers-color-scheme: dark) {
+  /* 保持亮色主题，因为是儿童游戏 */
+  /* 如果需要暗色模式，取消下面的注释 */
+  /*
+  :root {
+    --bg-gradient-start: #1a1a2e;
+    --bg-gradient-end: #16213e;
+    --panel-bg: rgba(30, 30, 50, 0.95);
+    --text-primary: #ffffff;
+    --text-secondary: #aaaaaa;
+  }
+  */
+}
+
+/* 打印样式 */
+@media print {
+  body {
+    background: white;
+  }
+  
+  #game-container {
+    box-shadow: none;
+  }
+  
+  .modal,
+  #controls,
+  #fx-canvas {
+    display: none !important;
+  }
+}
+
