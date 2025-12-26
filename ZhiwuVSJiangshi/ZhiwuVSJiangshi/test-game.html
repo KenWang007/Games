@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>🌻 植物大战僵尸 - 测试版</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(180deg, #87CEEB 0%, #E0F6FF 40%, #7EC850 40%, #5DB336 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        #game-container {
+            position: relative;
+            width: 900px;
+            height: 600px;
+            background: linear-gradient(180deg, #87CEEB 0%, #E0F6FF 40%, #7EC850 40%, #5DB336 100%);
+            border-radius: 20px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        #game-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            touch-action: none;
+        }
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+        .overlay.hidden { display: none; }
+        .overlay h1 {
+            color: white;
+            font-size: 48px;
+            margin-bottom: 20px;
+            text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.5);
+        }
+        .btn {
+            padding: 15px 40px;
+            font-size: 24px;
+            font-weight: bold;
+            background: #4CAF50;
+            color: white;
+            border: 4px solid #5DB336;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            font-family: inherit;
+        }
+        .btn:active { transform: scale(0.95); }
+        .info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #0f0;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            z-index: 50;
+        }
+        @media (max-width: 920px) {
+            #game-container {
+                width: 100vw;
+                height: 100vh;
+                border-radius: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="game-canvas"></canvas>
+        
+        <div class="overlay" id="menu">
+            <h1>🌻 植物大战僵尸 🧟</h1>
+            <button class="btn" id="btn-start">开始游戏</button>
+        </div>
+        
+        <div class="info" id="info">
+            DPR: <span id="dpr">-</span><br>
+            Canvas: <span id="canvas-size">-</span><br>
+            Scale: <span id="scale">-</span><br>
+            点击数: <span id="clicks">0</span>
+        </div>
+    </div>
+    
+    <script>
+        const canvas = document.getElementById('game-canvas');
+        const menu = document.getElementById('menu');
+        const btnStart = document.getElementById('btn-start');
+        
+        const CANVAS_WIDTH = 900;
+        const CANVAS_HEIGHT = 600;
+        
+        let ctx;
+        let clickCount = 0;
+        let gameStarted = false;
+        
+        // ===== 关键：Canvas设置（和touch-test.html完全相同）=====
+        function setupCanvas() {
+            const dpr = window.devicePixelRatio || 1;
+            
+            console.log('🎮 开始设置Canvas...');
+            console.log(`DPR = ${dpr}`);
+            
+            // 1. 设置Canvas内部分辨率
+            canvas.width = CANVAS_WIDTH * dpr;
+            canvas.height = CANVAS_HEIGHT * dpr;
+            console.log(`Canvas内部尺寸 = ${canvas.width}x${canvas.height}`);
+            
+            // 2. 设置CSS显示尺寸
+            canvas.style.width = CANVAS_WIDTH + 'px';
+            canvas.style.height = CANVAS_HEIGHT + 'px';
+            console.log(`CSS尺寸 = ${CANVAS_WIDTH}x${CANVAS_HEIGHT}`);
+            
+            // 3. 获取context并缩放
+            ctx = canvas.getContext('2d');
+            ctx.scale(dpr, dpr);
+            console.log(`Context缩放 = scale(${dpr}, ${dpr})`);
+            
+            // 4. 设置渲染质量
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            
+            // 更新显示
+            document.getElementById('dpr').textContent = dpr + 'x';
+            document.getElementById('canvas-size').textContent = canvas.width + 'x' + canvas.height;
+            document.getElementById('scale').textContent = dpr;
+            
+            console.log('✅ Canvas设置完成！');
+        }
+        
+        // ===== 坐标转换（和touch-test.html完全相同）=====
+        function getCanvasCoordinates(clientX, clientY) {
+            const rect = canvas.getBoundingClientRect();
+            const x = (clientX - rect.left) / rect.width * CANVAS_WIDTH;
+            const y = (clientY - rect.top) / rect.height * CANVAS_HEIGHT;
+            return { x, y };
+        }
+        
+        // ===== 绘制游戏画面 =====
+        function render() {
+            // 清空画布
+            ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            
+            if (!gameStarted) return;
+            
+            // 绘制草坪背景
+            ctx.fillStyle = '#7EC850';
+            ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            
+            // 绘制网格线
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx.lineWidth = 2;
+            for (let x = 0; x <= CANVAS_WIDTH; x += 100) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, CANVAS_HEIGHT);
+                ctx.stroke();
+            }
+            for (let y = 0; y <= CANVAS_HEIGHT; y += 100) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(CANVAS_WIDTH, y);
+                ctx.stroke();
+            }
+            
+            // 绘制提示文字
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 32px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('点击任意位置测试', CANVAS_WIDTH/2, CANVAS_HEIGHT/2 - 20);
+            
+            ctx.font = '20px Arial';
+            ctx.fillText('点击数: ' + clickCount, CANVAS_WIDTH/2, CANVAS_HEIGHT/2 + 20);
+            
+            // 继续渲染
+            requestAnimationFrame(render);
+        }
+        
+        // ===== 处理点击 =====
+        function handleClick(clientX, clientY) {
+            if (!gameStarted) return;
+            
+            const coords = getCanvasCoordinates(clientX, clientY);
+            clickCount++;
+            document.getElementById('clicks').textContent = clickCount;
+            
+            console.log(`点击 #${clickCount}: 屏幕(${Math.round(clientX)},${Math.round(clientY)}) → 逻辑(${Math.round(coords.x)},${Math.round(coords.y)})`);
+            
+            // 绘制点击效果
+            ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
+            ctx.beginPath();
+            ctx.arc(coords.x, coords.y, 30, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(`(${Math.round(coords.x)}, ${Math.round(coords.y)})`, coords.x, coords.y + 50);
+        }
+        
+        // ===== 事件监听 =====
+        btnStart.addEventListener('click', () => {
+            console.log('🎮 开始游戏！');
+            menu.classList.add('hidden');
+            gameStarted = true;
+            render();
+        });
+        
+        canvas.addEventListener('click', (e) => {
+            handleClick(e.clientX, e.clientY);
+        });
+        
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (e.touches.length > 0) {
+                const touch = e.touches[0];
+                handleClick(touch.clientX, touch.clientY);
+            }
+        }, { passive: false });
+        
+        // ===== 初始化 =====
+        window.addEventListener('load', () => {
+            console.log('🚀 页面加载完成');
+            setupCanvas();
+            console.log('✅ 初始化完成！');
+        });
+        
+        window.addEventListener('resize', () => {
+            console.log('📱 窗口大小改变，重新设置Canvas');
+            setupCanvas();
+        });
+    </script>
+</body>
+</html>
+
