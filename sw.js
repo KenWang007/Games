@@ -1,7 +1,7 @@
 // Service Worker for Game Hub
 // 提供离线访问和缓存功能
 
-const CACHE_NAME = 'game-hub-v2-mobile-fix'; // 更新版本强制刷新缓存
+const CACHE_NAME = 'game-hub-v3-FINAL-FIX-' + Date.now(); // 使用时间戳强制刷新
 const urlsToCache = [
   '/Games/',
   '/Games/index.html',
@@ -12,19 +12,20 @@ const urlsToCache = [
 
 // 安装 Service Worker
 self.addEventListener('install', (event) => {
-  console.log('[Service Worker] Installing new version...');
+  console.log('[Service Worker] Installing FINAL version...');
   // 强制跳过等待，立即激活
   self.skipWaiting();
   
+  // 不缓存任何文件，让浏览器直接从服务器加载
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('[Service Worker] Caching app shell');
-        return cache.addAll(urlsToCache);
-      })
-      .catch((err) => {
-        console.log('[Service Worker] Cache failed:', err);
-      })
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          console.log('[Service Worker] Deleting cache:', cacheName);
+          return caches.delete(cacheName);
+        })
+      );
+    })
   );
 });
 
@@ -48,38 +49,12 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// 拦截请求
+// 拦截请求 - 直接从网络获取，不使用缓存
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // 如果缓存中有，返回缓存
-        if (response) {
-          return response;
-        }
-        
-        // 否则从网络获取
-        return fetch(event.request).then((response) => {
-          // 检查是否是有效的响应
-          if (!response || response.status !== 200 || response.type !== 'basic') {
-            return response;
-          }
-          
-          // 克隆响应，一份给浏览器，一份存入缓存
-          const responseToCache = response.clone();
-          
-          caches.open(CACHE_NAME)
-            .then((cache) => {
-              cache.put(event.request, responseToCache);
-            });
-          
-          return response;
-        });
-      })
-      .catch(() => {
-        // 如果都失败了，可以返回一个默认页面
-        console.log('[Service Worker] Fetch failed');
-      })
+    fetch(event.request).catch(() => {
+      console.log('[Service Worker] Fetch failed:', event.request.url);
+    })
   );
 });
 
