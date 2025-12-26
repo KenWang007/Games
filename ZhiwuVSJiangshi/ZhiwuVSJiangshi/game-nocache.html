@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>🌻 植物大战僵尸</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Comic Sans MS', cursive;
+            background: linear-gradient(180deg, #87CEEB 0%, #E0F6FF 40%, #7EC850 40%, #5DB336 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        #game-container {
+            position: relative;
+            width: 900px;
+            height: 600px;
+            background: #000;
+            border-radius: 20px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        #game-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            touch-action: none;
+        }
+        .menu {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+        .menu.hidden { display: none; }
+        .menu h1 {
+            color: #FFD700;
+            font-size: 48px;
+            margin-bottom: 30px;
+            text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.8);
+        }
+        .btn {
+            padding: 20px 50px;
+            font-size: 28px;
+            font-weight: bold;
+            background: #4CAF50;
+            color: white;
+            border: 4px solid #5DB336;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            font-family: inherit;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        .btn:active { transform: scale(0.95); }
+        .debug {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #0f0;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 11px;
+            z-index: 50;
+            max-width: 300px;
+        }
+        @media (max-width: 920px) {
+            #game-container {
+                width: 100vw;
+                height: 100vh;
+                border-radius: 0;
+            }
+            .menu h1 { font-size: 32px; }
+            .btn { font-size: 20px; padding: 15px 30px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="game-canvas"></canvas>
+        
+        <div class="menu" id="menu">
+            <h1>🌻 植物大战僵尸 🧟</h1>
+            <button class="btn" id="btn-start">开始游戏</button>
+        </div>
+        
+        <div class="debug" id="debug">
+            页面版本: NOCACHE-v1<br>
+            时间: <span id="time"></span><br>
+            DPR: <span id="dpr">-</span><br>
+            Canvas: <span id="canvas-size">-</span><br>
+            点击: <span id="clicks">0</span>
+        </div>
+    </div>
+    
+    <script>
+        // 显示当前时间证明是最新版本
+        document.getElementById('time').textContent = new Date().toLocaleTimeString();
+        
+        const canvas = document.getElementById('game-canvas');
+        const menu = document.getElementById('menu');
+        const btnStart = document.getElementById('btn-start');
+        
+        const CANVAS_WIDTH = 900;
+        const CANVAS_HEIGHT = 600;
+        
+        let ctx;
+        let gameStarted = false;
+        let clickCount = 0;
+        let plants = [];
+        let suns = [];
+        let sunCount = 50;
+        
+        console.log('🎮 游戏页面加载 - 无缓存版本');
+        console.log('当前时间:', new Date().toLocaleTimeString());
+        
+        // Canvas设置 - 和test-game完全相同
+        function setupCanvas() {
+            const dpr = window.devicePixelRatio || 1;
+            console.log(`设置Canvas: DPR=${dpr}`);
+            
+            canvas.width = CANVAS_WIDTH * dpr;
+            canvas.height = CANVAS_HEIGHT * dpr;
+            canvas.style.width = CANVAS_WIDTH + 'px';
+            canvas.style.height = CANVAS_HEIGHT + 'px';
+            
+            ctx = canvas.getContext('2d');
+            ctx.scale(dpr, dpr);
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            
+            document.getElementById('dpr').textContent = dpr + 'x';
+            document.getElementById('canvas-size').textContent = canvas.width + 'x' + canvas.height;
+            
+            console.log(`✅ Canvas设置完成: ${canvas.width}x${canvas.height}`);
+        }
+        
+        // 坐标转换 - 和test-game完全相同
+        function getCanvasCoordinates(clientX, clientY) {
+            const rect = canvas.getBoundingClientRect();
+            const x = (clientX - rect.left) / rect.width * CANVAS_WIDTH;
+            const y = (clientY - rect.top) / rect.height * CANVAS_HEIGHT;
+            return { x, y };
+        }
+        
+        // 绘制游戏
+        function render() {
+            if (!gameStarted) return;
+            
+            // 清空
+            ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            
+            // 背景
+            const skyGradient = ctx.createLinearGradient(0, 0, 0, 240);
+            skyGradient.addColorStop(0, '#87CEEB');
+            skyGradient.addColorStop(1, '#E0F6FF');
+            ctx.fillStyle = skyGradient;
+            ctx.fillRect(0, 0, CANVAS_WIDTH, 240);
+            
+            ctx.fillStyle = '#7EC850';
+            ctx.fillRect(0, 240, CANVAS_WIDTH, 360);
+            
+            // 网格
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+            ctx.lineWidth = 2;
+            for (let row = 0; row < 5; row++) {
+                for (let col = 0; col < 9; col++) {
+                    const x = 100 + col * 80;
+                    const y = 240 + row * 72;
+                    ctx.strokeRect(x, y, 80, 72);
+                }
+            }
+            
+            // 阳光计数器
+            ctx.fillStyle = 'rgba(139, 69, 19, 0.9)';
+            ctx.fillRect(10, 10, 120, 50);
+            ctx.fillStyle = '#FFD700';
+            ctx.font = 'bold 24px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText('☀️ ' + sunCount, 20, 40);
+            
+            // 阳光
+            suns.forEach(sun => {
+                ctx.fillStyle = 'rgba(255, 215, 0, 0.8)';
+                ctx.beginPath();
+                ctx.arc(sun.x, sun.y, 20, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#FFA500';
+                ctx.font = 'bold 14px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('☀️', sun.x, sun.y + 5);
+            });
+            
+            // 植物
+            plants.forEach(plant => {
+                ctx.fillStyle = plant.color;
+                ctx.beginPath();
+                ctx.arc(plant.x, plant.y, 25, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 20px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(plant.emoji, plant.x, plant.y + 7);
+            });
+            
+            // 提示
+            if (plants.length === 0 && suns.length === 0) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.fillRect(CANVAS_WIDTH/2 - 200, CANVAS_HEIGHT/2 - 50, 400, 100);
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 24px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('点击草坪种植向日葵', CANVAS_WIDTH/2, CANVAS_HEIGHT/2);
+                ctx.font = '16px Arial';
+                ctx.fillText('（测试触摸是否正常）', CANVAS_WIDTH/2, CANVAS_HEIGHT/2 + 30);
+            }
+            
+            requestAnimationFrame(render);
+        }
+        
+        // 处理点击
+        function handleClick(clientX, clientY) {
+            if (!gameStarted) return;
+            
+            const coords = getCanvasCoordinates(clientX, clientY);
+            clickCount++;
+            document.getElementById('clicks').textContent = clickCount;
+            
+            console.log(`点击 #${clickCount}: (${Math.round(coords.x)}, ${Math.round(coords.y)})`);
+            
+            // 点击阳光
+            for (let i = suns.length - 1; i >= 0; i--) {
+                const sun = suns[i];
+                const dist = Math.sqrt((coords.x - sun.x)**2 + (coords.y - sun.y)**2);
+                if (dist < 20) {
+                    suns.splice(i, 1);
+                    sunCount += 25;
+                    console.log('收集阳光！sunCount=' + sunCount);
+                    return;
+                }
+            }
+            
+            // 在草坪上种植
+            if (coords.y > 240 && sunCount >= 50) {
+                plants.push({
+                    x: coords.x,
+                    y: coords.y,
+                    emoji: '🌻',
+                    color: '#FFD700'
+                });
+                sunCount -= 50;
+                
+                // 生成阳光
+                setTimeout(() => {
+                    suns.push({
+                        x: coords.x + (Math.random() - 0.5) * 60,
+                        y: coords.y - 30
+                    });
+                }, 2000);
+                
+                console.log('种植向日葵！sunCount=' + sunCount);
+            }
+        }
+        
+        // 事件
+        btnStart.addEventListener('click', () => {
+            console.log('🎮 开始游戏！');
+            menu.classList.add('hidden');
+            gameStarted = true;
+            render();
+        });
+        
+        canvas.addEventListener('click', (e) => {
+            handleClick(e.clientX, e.clientY);
+        });
+        
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (e.touches.length > 0) {
+                const touch = e.touches[0];
+                handleClick(touch.clientX, touch.clientY);
+            }
+        }, { passive: false });
+        
+        // 初始化
+        window.addEventListener('load', () => {
+            console.log('✅ 页面加载完成');
+            setupCanvas();
+            console.log('✅ 初始化完成！');
+        });
+    </script>
+</body>
+</html>
+
