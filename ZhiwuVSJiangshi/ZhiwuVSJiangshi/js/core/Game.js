@@ -34,10 +34,15 @@ export class Game {
     constructor(canvasId) {
         // Canvas设置
         this.canvas = document.getElementById(canvasId);
+        
+        // 设置Canvas尺寸并支持高DPI屏幕（必须在获取context之前）
+        this.setupCanvas();
+        
+        // 获取context（setupCanvas之后）
         this.ctx = this.canvas.getContext('2d');
         
-        // 设置Canvas尺寸并支持高DPI屏幕
-        this.setupCanvas();
+        // 应用缩放
+        this.applyCanvasScale();
         
         // 游戏状态
         this.state = GAME_STATE.MENU;
@@ -99,39 +104,38 @@ export class Game {
     }
     
     /**
-     * 设置Canvas以支持高DPI屏幕（防止模糊）
+     * 设置Canvas尺寸（不获取context）
      */
     setupCanvas() {
-        // 获取设备像素比（高DPI屏幕如小米手机通常是2-3）
+        // 获取设备像素比
         const dpr = window.devicePixelRatio || 1;
-        
-        // 保存当前DPI值
         this.currentDPR = dpr;
         
-        // 先移除CSS的width/height，使用固定逻辑尺寸
-        this.canvas.style.width = '';
-        this.canvas.style.height = '';
+        // 设置Canvas的内部像素尺寸（固定逻辑尺寸 × DPR）
+        this.canvas.width = CANVAS_WIDTH * dpr;
+        this.canvas.height = CANVAS_HEIGHT * dpr;
         
-        // 获取Canvas容器的实际显示尺寸
-        const rect = this.canvas.getBoundingClientRect();
+        // 设置CSS显示尺寸（保持逻辑尺寸不变）
+        this.canvas.style.width = CANVAS_WIDTH + 'px';
+        this.canvas.style.height = CANVAS_HEIGHT + 'px';
         
-        // 设置Canvas的内部像素尺寸（提高到物理像素）
-        this.canvas.width = rect.width * dpr;
-        this.canvas.height = rect.height * dpr;
+        console.log(`📱 Canvas尺寸设置: DPR=${dpr}x, Canvas=${this.canvas.width}x${this.canvas.height}, CSS=${CANVAS_WIDTH}x${CANVAS_HEIGHT}`);
+    }
+    
+    /**
+     * 应用Canvas缩放
+     */
+    applyCanvasScale() {
+        const dpr = this.currentDPR || 1;
         
-        // 重新获取context（设置width/height会重置context）
-        this.ctx = this.canvas.getContext('2d');
-        
-        // 缩放绘图上下文以匹配显示尺寸和逻辑尺寸
-        const scaleX = rect.width / CANVAS_WIDTH;
-        const scaleY = rect.height / CANVAS_HEIGHT;
-        this.ctx.scale(scaleX * dpr, scaleY * dpr);
+        // 缩放绘图上下文使坐标系统保持不变
+        this.ctx.scale(dpr, dpr);
         
         // 设置图像渲染质量
         this.ctx.imageSmoothingEnabled = true;
         this.ctx.imageSmoothingQuality = 'high';
         
-        console.log(`📱 Canvas高清设置: DPR=${dpr}x, 显示=${rect.width}x${rect.height}, Canvas=${this.canvas.width}x${this.canvas.height}, 逻辑=${CANVAS_WIDTH}x${CANVAS_HEIGHT}, scale=${scaleX*dpr},${scaleY*dpr}`);
+        console.log(`📱 Canvas缩放应用: scale(${dpr}, ${dpr})`);
     }
     
     /**
@@ -201,6 +205,8 @@ export class Game {
             if (newDPR !== this.currentDPR) {
                 console.log(`📱 检测到DPI变化: ${this.currentDPR} → ${newDPR}，重新设置Canvas`);
                 this.setupCanvas();
+                this.ctx = this.canvas.getContext('2d');
+                this.applyCanvasScale();
             }
         });
         
