@@ -26,8 +26,141 @@ export class GameStatsUI {
         this.levelUpAnimation = 0;
         this.lastLevel = 1;
         
+        // 用户偏好设置 - 从localStorage读取
+        this.isStatsVisible = this.loadStatsPreference();
+        
         // 创建HTML侧边栏
         this.createSidebar();
+        
+        // 绑定切换按钮事件
+        this.bindToggleButton();
+        
+        // 应用初始显示状态
+        this.applyInitialState();
+    }
+    
+    /**
+     * 应用初始显示状态
+     */
+    applyInitialState() {
+        // 根据用户偏好设置初始状态
+        if (this.isStatsVisible) {
+            // 不立即显示，等待游戏调用show()
+        } else {
+            this.hide();
+        }
+    }
+    
+    /**
+     * 从localStorage加载统计面板显示偏好
+     */
+    loadStatsPreference() {
+        try {
+            const saved = localStorage.getItem('pvz_stats_visible');
+            // 默认显示，除非用户明确设置为隐藏
+            return saved === null ? true : saved === 'true';
+        } catch (e) {
+            return true;
+        }
+    }
+    
+    /**
+     * 保存统计面板显示偏好到localStorage
+     */
+    saveStatsPreference(visible) {
+        try {
+            localStorage.setItem('pvz_stats_visible', visible);
+        } catch (e) {
+            console.warn('无法保存统计面板偏好设置');
+        }
+    }
+    
+    /**
+     * 绑定切换按钮事件
+     */
+    bindToggleButton() {
+        const toggleBtn = document.getElementById('btn-toggle-stats');
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', () => {
+                this.toggleStats();
+            });
+            
+            // 更新按钮图标
+            this.updateToggleButton();
+        }
+    }
+    
+    /**
+     * 切换统计面板显示/隐藏
+     */
+    toggleStats() {
+        // 检查是否在移动端横屏模式
+        const isMobileLandscape = window.innerWidth <= 920 && window.matchMedia('(orientation: landscape)').matches;
+        
+        if (isMobileLandscape && !this.isStatsVisible) {
+            // 在移动端横屏时，不允许显示统计面板
+            this.showToggleToast('横屏模式下无法显示统计面板');
+            return;
+        }
+        
+        this.isStatsVisible = !this.isStatsVisible;
+        this.saveStatsPreference(this.isStatsVisible);
+        
+        if (this.isStatsVisible) {
+            this.forceShow();
+        } else {
+            this.hide();
+        }
+        
+        this.updateToggleButton();
+        
+        // 添加提示
+        this.showToggleToast(this.isStatsVisible ? '统计面板已显示 📊' : '统计面板已隐藏 📋');
+    }
+    
+    /**
+     * 更新切换按钮的图标
+     */
+    updateToggleButton() {
+        const toggleBtn = document.getElementById('btn-toggle-stats');
+        if (toggleBtn) {
+            toggleBtn.textContent = this.isStatsVisible ? '📊' : '📋';
+            toggleBtn.title = this.isStatsVisible ? '隐藏统计面板' : '显示统计面板';
+        }
+    }
+    
+    /**
+     * 显示切换提示
+     */
+    showToggleToast(message) {
+        // 创建或获取提示元素
+        let toast = document.getElementById('stats-toggle-toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'stats-toggle-toast';
+            toast.style.cssText = `
+                position: fixed;
+                top: 80px;
+                right: 20px;
+                background: rgba(0, 0, 0, 0.8);
+                color: white;
+                padding: 10px 20px;
+                border-radius: 8px;
+                font-size: 14px;
+                z-index: 10000;
+                opacity: 0;
+                transition: opacity 0.3s;
+                pointer-events: none;
+            `;
+            document.body.appendChild(toast);
+        }
+        
+        toast.textContent = message;
+        toast.style.opacity = '1';
+        
+        setTimeout(() => {
+            toast.style.opacity = '0';
+        }, 2000);
     }
     
     /**
@@ -320,6 +453,15 @@ export class GameStatsUI {
      * 显示侧边栏
      */
     show() {
+        if (this.sidebar && this.isStatsVisible) {
+            this.sidebar.classList.add('visible');
+        }
+    }
+    
+    /**
+     * 强制显示侧边栏（忽略用户偏好，用于初始化）
+     */
+    forceShow() {
         if (this.sidebar) {
             this.sidebar.classList.add('visible');
         }

@@ -274,6 +274,17 @@ body {
     transform: scale(0.95);
 }
 
+/* 统计面板切换按钮特殊样式 */
+#btn-toggle-stats {
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.9), rgba(56, 142, 60, 0.9));
+    border-color: #4CAF50;
+}
+
+#btn-toggle-stats:hover {
+    background: linear-gradient(135deg, rgba(76, 175, 80, 1), rgba(56, 142, 60, 1));
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+}
+
 /* Overlay Screens */
 .overlay-screen {
     position: absolute;
